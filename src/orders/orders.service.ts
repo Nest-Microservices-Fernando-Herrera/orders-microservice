@@ -1,5 +1,6 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { RpcException } from '@nestjs/microservices';
 import { CreateOrderDto } from './dto';
 
 @Injectable()
@@ -24,7 +25,20 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     return `This action returns all orders`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findOne(id: string) {
+    // Intentar traser el Order por su ID
+    const order = await this.orders.findFirst({
+      where: { id }
+    });
+
+    // Si no se lo pudo obtener...
+    if (!order) {
+      throw new RpcException({
+        message: `Order with id: ${id} not found`,
+        status: HttpStatus.NOT_FOUND
+      });
+    }
+
+    return order;
   }
 }
