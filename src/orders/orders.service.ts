@@ -15,10 +15,15 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
   }
 
   create(createOrderDto: CreateOrderDto) {
+    return {
+      service: 'Orders Microservice',
+      createOrderDto: createOrderDto
+    };
+
     // Especificar los datos a insertar
-    return this.orders.create({
-      data: createOrderDto
-    });
+    // return this.orders.create({
+    //   data: createOrderDto
+    // });
   }
 
   async findAll(orderPaginationDto: OrderPaginationDTO) {
