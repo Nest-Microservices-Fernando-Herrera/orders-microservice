@@ -3,15 +3,15 @@ import { Type } from 'class-transformer';
 
 // DTO para la paginación
 export class PaginationDto {
-    /* Propiedades */
+  /* Propiedades */
 
-    @IsPositive()
-    @IsOptional()
-    @Type(() => Number)
-    page?: number = 1;
+  @IsPositive()
+  @IsOptional()
+  @Type(() => Number)
+  page?: number = 1;
 
-    @IsPositive()
-    @IsOptional()
-    @Type(() => Number)
-    limit?: number = 10;
+  @IsPositive()
+  @IsOptional()
+  @Type(() => Number)
+  limit?: number = 10;
 }

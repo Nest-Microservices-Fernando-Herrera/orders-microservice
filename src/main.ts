@@ -15,19 +15,21 @@ async function bootstrap() {
       /* Opciones de configuración */
       transport: Transport.TCP, // Medio de transporte,
       options: {
-        port: envs.port
-      }
-    }
+        port: envs.port,
+      },
+    },
   );
 
   // Configuración global de los Pipes
-  app.useGlobalPipes(new ValidationPipe({
-    // Habilitandod los DTOs
-    whitelist: true,
-    forbidNonWhitelisted: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // Habilitandod los DTOs
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   await app.listen();
-  logger.log(`Microservice running on port ${envs.port}`);
+  logger.log(`OrdersMicroservice running on port ${envs.port}`);
 }
 bootstrap();

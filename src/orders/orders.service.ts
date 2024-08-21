@@ -1,11 +1,30 @@
-import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { RpcException } from '@nestjs/microservices';
-import { ChangeOrderStatusDto, CreateOrderDto, OrderPaginationDTO } from './dto';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import {
+  ChangeOrderStatusDto,
+  CreateOrderDto,
+  OrderPaginationDTO,
+} from './dto';
+import { PRODUCTS_SERVICE } from 'src/config';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
   private readonly logger = new Logger('OrdersService');
+
+  // Inyección de dependencias
+  constructor(
+    @Inject(PRODUCTS_SERVICE) private readonly productsClient: ClientProxy,
+  ) {
+    super();
+  }
 
   // Inicializando Prisma
   async onModuleInit() {
@@ -14,16 +33,15 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     this.logger.log('Database connected');
   }
 
-  create(createOrderDto: CreateOrderDto) {
-    return {
-      service: 'Orders Microservice',
-      createOrderDto: createOrderDto
-    };
+  async create(createOrderDto: CreateOrderDto) {
+    const ids = [5, 6];
 
-    // Especificar los datos a insertar
-    // return this.orders.create({
-    //   data: createOrderDto
-    // });
+    // Validando los productos de la Order
+    const products = await firstValueFrom(
+      this.productsClient.send({ cmd: 'validate_products' }, ids),
+    );
+
+    return products;
   }
 
   async findAll(orderPaginationDto: OrderPaginationDTO) {
@@ -34,8 +52,8 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     const totalOrders = await this.orders.count({
       // Filtrando por el Status
       where: {
-        status
-      }
+        status,
+      },
     });
 
     // Obtener la última página
@@ -47,28 +65,28 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         skip: (page - 1) * limit,
         take: limit,
         where: {
-          status
-        }
+          status,
+        },
       }),
       meta: {
         total: totalOrders,
         page: page,
         lastPage: lastPage,
-      }
+      },
     };
   }
 
   async findOne(id: string) {
     // Intentar traser el Order por su ID
     const order = await this.orders.findFirst({
-      where: { id }
+      where: { id },
     });
 
     // Si no se lo pudo obtener...
     if (!order) {
       throw new RpcException({
         message: `Order with id: ${id} not found`,
-        status: HttpStatus.NOT_FOUND
+        status: HttpStatus.NOT_FOUND,
       });
     }
 
@@ -81,7 +99,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
 
     // Intentar encontrar el Order por su ID
     const order = await this.findOne(id);
-    
+
     // Evitar actualizar el status de la Order si ya lo tiene
     if (order.status === status) {
       return order;
@@ -90,7 +108,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     // Proceder a actualizar y devolver la Order con su state
     return this.orders.update({
       where: { id },
-      data: { status: status }
+      data: { status: status },
     });
   }
 }

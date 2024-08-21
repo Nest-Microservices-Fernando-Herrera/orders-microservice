@@ -1,15 +1,15 @@
-import { IsEnum, IsUUID } from "class-validator";
-import { OrderStatus } from "@prisma/client";
-import { OrderStatusList } from "../enum/order.enum";
+import { IsEnum, IsUUID } from 'class-validator';
+import { OrderStatus } from '@prisma/client';
+import { OrderStatusList } from '../enum/order.enum';
 
 export class ChangeOrderStatusDto {
-    /* Propiedades */
+  /* Propiedades */
 
-    @IsUUID()
-    id: string;
+  @IsUUID()
+  id: string;
 
-    @IsEnum(OrderStatusList, {
-        message: `Valid status are ${OrderStatusList}`
-    })
-    status: OrderStatus;
+  @IsEnum(OrderStatusList, {
+    message: `Valid status are ${OrderStatusList}`,
+  })
+  status: OrderStatus;
 }
