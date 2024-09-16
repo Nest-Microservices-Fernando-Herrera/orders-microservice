@@ -6,6 +6,7 @@ import { envs } from './config';
 
 async function bootstrap() {
   const logger = new Logger('OrdersMS-Main');
+  console.log(envs.natsServers);
 
   // Creando la instancia de la app e implementar el microservicio
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -13,9 +14,9 @@ async function bootstrap() {
     AppModule,
     {
       /* Opciones de configuración */
-      transport: Transport.TCP, // Medio de transporte,
+      transport: Transport.NATS, // Medio de transporte,
       options: {
-        port: envs.port,
+        servers: envs.natsServers,
       },
     },
   );
